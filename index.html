@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Zotero Bridge</title>
+
+    <!-- Mitigate referrer leakage -->
+    <meta name="referrer" content="no-referrer" />
+
+    <script>
+      function safeZoteroUri(raw) {
+        if (!raw) return null;
+        const s = raw.trim();
+
+        // Only allow zotero:// links
+        if (!s.startsWith("zotero://")) return null;
+
+        // Optional hardening: block control characters
+        if (/[\u0000-\u001F\u007F]/.test(s)) return null;
+
+        return s;
+      }
+
+      window.onload = () => {
+        // Preferred: fragment form
+        // https://YOURNAME.github.io/zotero-bridge/#zotero://open-pdf/...
+        let raw = window.location.hash ? window.location.hash.slice(1) : "";
+
+        const msg = document.getElementById("msg");
+        const a = document.getElementById("fallback");
+
+        const zoteroUri = safeZoteroUri(raw);
+        if (!zoteroUri) {
+          msg.textContent =
+            "Invalid or missing link. Use: https://.../#zotero://open-pdf/...";
+          return;
+        }
+
+        msg.textContent = "Opening Zotero…";
+        a.href = zoteroUri;
+        a.textContent = "Click here if it didn’t open automatically.";
+
+        // Redirect to Zotero desktop
+        window.location.href = zoteroUri;
+      };
+    </script>
+  </head>
+  <body>
+    <p id="msg">Loading…</p>
+    <p><a id="fallback" href="#"></a></p>
+  </body>
+</html>
